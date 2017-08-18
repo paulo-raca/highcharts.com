@@ -130,6 +130,17 @@ wrap(seriesTypes.column.prototype, 'translate', function (proceed) {
 			shapeArgs.depth = depth;
 			shapeArgs.insidePlotArea = true;
 
+			//The pivot point is used to calculate the zIndex
+			shapeArgs.pivot = {
+				x: shapeArgs.x + shapeArgs.width/2,
+				y: shapeArgs.y + shapeArgs.height/2,
+				z: shapeArgs.z + shapeArgs.depth/2,
+			};
+
+			// Ordering by cuboid center isn't 100% acculate, but, setting y=0 on all does work for this case.
+			// (Instead of setting to 0, we divide it so that the stacked columns still work
+			shapeArgs.pivot[chart.inverted ? 'x' : 'y'] /= 1000;
+
 			// Translate the tooltip position in 3d space
 			tooltipPos = perspective([{ x: tooltipPos[0], y: tooltipPos[1], z: z }], chart, true)[0];
 			point.tooltipPos = [tooltipPos.x, tooltipPos.y];
