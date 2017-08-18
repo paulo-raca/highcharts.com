@@ -1815,7 +1815,7 @@ extend(SVGElement.prototype, /** @lends Highcharts.SVGElement.prototype */ {
 				otherZIndex = otherElement.zIndex;
 				if (otherElement !== element && (
 						// Insert before the first element with a higher zIndex
-						pInt(otherZIndex) > value ||
+						parseFloat(otherZIndex) > value ||
 						// If no zIndex given, insert before the first element with a zIndex
 						(!defined(value) && defined(otherZIndex)) ||
 						// Negative zIndex versus no zIndex:
