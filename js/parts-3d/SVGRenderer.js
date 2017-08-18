@@ -221,36 +221,60 @@ SVGRenderer.prototype.polyhedron = function (args) {
 		return destroy.call(this);
 	};
 
-	wrap(result, 'attr', function (proceed, hash, val, complete, continueAnimation) {
-		if (typeof hash === 'object' && defined(hash.faces)) {
-			while (result.faces.length > hash.faces.length) {
-				result.faces.pop().destroy();
+	wrap(result, 'attr', function (proceed, params, val, complete, continueAnimation) {
+		if (typeof params === 'object') {
+			if (defined(params.faces))  {
+				var facesParam = params.faces;
+				delete params.faces;
+
+				while (result.faces.length > facesParam.length) {
+					result.faces.pop().destroy();
+				}
+				while (result.faces.length < facesParam.length) {
+					result.faces.push(renderer.face3d().add(result));
+				}
+				for (var i = 0; i < result.faces.length; i++) {
+					result.faces[i].attr(merge(params, facesParam[i]), val, complete, continueAnimation);
+				}
+			} else {
+				for (var i = 0; i < result.faces.length; i++) {
+					result.faces[i].attr(params, val, complete, continueAnimation);
+				}
 			}
-			while (result.faces.length < hash.faces.length) {
-				result.faces.push(renderer.face3d().add(result));
-			}
-			for (var i = 0; i < hash.faces.length; i++) {
-				result.faces[i].attr(hash.faces[i], null, complete, continueAnimation);
-			}
-			delete hash.faces;
+
+			return this;
+
+		} else {
+			return proceed.apply(this, [].slice.call(arguments, 1));
 		}
-		return proceed.apply(this, [].slice.call(arguments, 1));
 	});
 
-	wrap(result, 'animate', function (proceed, params, duration, complete) {
-		if (params && params.faces) {
-			while (result.faces.length > params.faces.length) {
-				result.faces.pop().destroy();
+	wrap(result, 'animate', function (proceed, params, options, complete) {
+		if (typeof params === 'object') {
+			if (defined(params.faces))  {
+				var facesParam = params.faces;
+				delete params.faces;
+
+				while (result.faces.length > facesParam.length) {
+					result.faces.pop().destroy();
+				}
+				while (result.faces.length < facesParam.length) {
+					result.faces.push(renderer.face3d().add(result));
+				}
+				for (var i = 0; i < result.faces.length; i++) {
+					result.faces[i].animate(merge(params, facesParam[i]), options, complete);
+				}
+			} else {
+				for (var i = 0; i < result.faces.length; i++) {
+					result.faces[i].animate(params, options, complete);
+				}
 			}
-			while (result.faces.length < params.faces.length) {
-				result.faces.push(renderer.face3d().add(result));
-			}
-			for (var i = 0; i < params.faces.length; i++) {
-				result.faces[i].animate(params.faces[i], duration, complete);
-			}
-			delete params.faces;
+
+			return this;
+
+		} else {
+			return proceed.apply(this, [].slice.call(arguments, 1));
 		}
-		return proceed.apply(this, [].slice.call(arguments, 1));
 	});
 
 	return result.attr(args);
