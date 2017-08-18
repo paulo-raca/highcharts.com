@@ -202,7 +202,8 @@ SVGRenderer.prototype.face3d = function (args) {
 SVGRenderer.prototype.polyhedron = function (args) {
 	var renderer = this,
 		result = this.g(),
-		destroy = result.destroy;
+		destroy = result.destroy,
+		attr = result.attr;
 
 	/*= if (build.classic) { =*/
 	result.attr({
@@ -211,6 +212,7 @@ SVGRenderer.prototype.polyhedron = function (args) {
 	/*= } =*/
 
 	result.faces = [];
+	result.pivot = null;
 
 
 	// destroy all children
@@ -223,6 +225,11 @@ SVGRenderer.prototype.polyhedron = function (args) {
 
 	wrap(result, 'attr', function (proceed, params, val, complete, continueAnimation) {
 		if (typeof params === 'object') {
+			if (defined(params.pivot) && defined(params.pivot.x) && defined(params.pivot.y) && defined(params.pivot.z))  {
+				result.pivot = params.pivot;
+				delete params.pivot;
+			}
+
 			if (defined(params.faces))  {
 				var facesParam = params.faces;
 				delete params.faces;
@@ -242,6 +249,12 @@ SVGRenderer.prototype.polyhedron = function (args) {
 				}
 			}
 
+			if (defined(result.pivot)) {
+				var chart = charts[renderer.chartIndex],
+					pivorProjection = perspective([result.pivot], chart)[0].z;
+				attr.call(this, {zIndex: -pivorProjection});
+			}
+
 			return this;
 
 		} else {
@@ -251,6 +264,11 @@ SVGRenderer.prototype.polyhedron = function (args) {
 
 	wrap(result, 'animate', function (proceed, params, options, complete) {
 		if (typeof params === 'object') {
+			if (defined(params.pivot) && defined(params.pivot.x) && defined(params.pivot.y) && defined(params.pivot.z))  {
+				result.pivot = params.pivot;
+				delete params.pivot;
+			}
+
 			if (defined(params.faces))  {
 				var facesParam = params.faces;
 				delete params.faces;
@@ -268,6 +286,12 @@ SVGRenderer.prototype.polyhedron = function (args) {
 				for (var i = 0; i < result.faces.length; i++) {
 					result.faces[i].animate(params, options, complete);
 				}
+			}
+
+			if (defined(result.pivot)) {
+				var chart = charts[renderer.chartIndex],
+					pivorProjection = perspective([result.pivot], chart)[0].z;
+				attr.call(this, {zIndex: -pivorProjection});
 			}
 
 			return this;
